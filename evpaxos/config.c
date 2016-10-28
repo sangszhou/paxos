@@ -114,6 +114,7 @@ evpaxos_config_read(const char* path)
 	}
 	
 	c = malloc(sizeof(struct evpaxos_config));
+
 	if (c == NULL) {
 		perror("malloc");
 		goto failure;
@@ -181,9 +182,8 @@ evpaxos_acceptor_listen_port(struct evpaxos_config* config, int i)
 	return config->acceptors[i].port;
 }
 
-static char*
-strtrim(char* string)
-{
+// 去掉空格
+static char* strtrim(char* string) {
 	char *s, *t;
 	for (s = string; isspace(*s); s++)
 		;
@@ -263,8 +263,7 @@ parse_address(char* str, struct address* addr)
 	return 0;
 }
 
-static int
-parse_verbosity(char* str, paxos_log_level* verbosity)
+static int parse_verbosity(char* str, paxos_log_level* verbosity)
 {
 	if (strcasecmp(str, "quiet") == 0) *verbosity = PAXOS_LOG_QUIET;
 	else if (strcasecmp(str, "error") == 0) *verbosity = PAXOS_LOG_ERROR;
@@ -274,8 +273,7 @@ parse_verbosity(char* str, paxos_log_level* verbosity)
 	return 1;
 }
 
-static int
-parse_backend(char* str, paxos_storage_backend* backend)
+static int parse_backend(char* str, paxos_storage_backend* backend)
 {
 	if (strcasecmp(str, "memory") == 0) *backend = PAXOS_MEM_STORAGE;
 	else if (strcasecmp(str, "lmdb") == 0) *backend = PAXOS_LMDB_STORAGE;
@@ -283,8 +281,7 @@ parse_backend(char* str, paxos_storage_backend* backend)
 	return 1;
 }
 
-static struct option*
-lookup_option(char* opt)
+static struct option* lookup_option(char* opt)
 {
 	int i = 0;
 	while (options[i].name != NULL) {
@@ -295,8 +292,7 @@ lookup_option(char* opt)
 	return NULL;
 }
 
-static int 
-parse_line(struct evpaxos_config* c, char* line)
+static int parse_line(struct evpaxos_config* c, char* line)
 {
 	int rv;
 	char* tok;
@@ -374,28 +370,21 @@ parse_line(struct evpaxos_config* c, char* line)
 	return rv;
 }
 
-static void
-address_init(struct address* a, char* addr, int port)
-{
+static void address_init(struct address* a, char* addr, int port) {
 	a->addr = strdup(addr);
 	a->port = port;
 }
 
-static void
-address_free(struct address* a)
-{
+static void address_free(struct address* a) {
 	free(a->addr);
 }
 
 static void
-address_copy(struct address* src, struct address* dst)
-{
+address_copy(struct address* src, struct address* dst) {
 	address_init(dst, src->addr, src->port);
 }
 
-static struct sockaddr_in
-address_to_sockaddr(struct address* a)
-{
+static struct sockaddr_in address_to_sockaddr(struct address* a) {
 	struct sockaddr_in addr;
 	memset(&addr, 0, sizeof(struct sockaddr_in));
 	addr.sin_family = AF_INET;

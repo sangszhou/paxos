@@ -42,10 +42,8 @@ static void paxos_accepted_to_promise(paxos_accepted* acc, paxos_message* out);
 static void paxos_accept_to_accepted(int id, paxos_accept* acc, paxos_message* out);
 static void paxos_accepted_to_preempted(int id, paxos_accepted* acc, paxos_message* out);
 
-
-struct acceptor*
-acceptor_new(int id)
-{
+// id 是谁分配的
+struct acceptor* acceptor_new(int id) {
 	struct acceptor* a;
 	a = malloc(sizeof(struct acceptor));
 	storage_init(&a->store, id);
@@ -62,24 +60,26 @@ acceptor_new(int id)
 	return a;
 }
 
-void
-acceptor_free(struct acceptor* a) 
-{
+void acceptor_free(struct acceptor* a) {
 	storage_close(&a->store);
 	free(a);
 }
 
-int
-acceptor_receive_prepare(struct acceptor* a, 
-	paxos_prepare* req, paxos_message* out)
-{
+// acceptor 的接收消息流程是怎样的
+
+int acceptor_receive_prepare(struct acceptor* a, paxos_prepare* req, paxos_message* out) {
 	paxos_accepted acc;
+
 	if (req->iid <= a->trim_iid)
 		return 0;
+
 	memset(&acc, 0, sizeof(paxos_accepted));
+
 	if (storage_tx_begin(&a->store) != 0)
 		return 0;
+
 	int found = storage_get_record(&a->store, req->iid, &acc);
+
 	if (!found || acc.ballot <= req->ballot) {
 		paxos_log_debug("Preparing iid: %u, ballot: %u", req->iid, req->ballot);
 		acc.aid = a->id;
